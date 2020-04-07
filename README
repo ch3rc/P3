@@ -1,12 +1,18 @@
 ==========================================================
 		    Compile and Run
 ==========================================================
+option 3: FSA_TABLE
 
-Initial commit for P1
+to compile the project type out 'make'
 
+to invoke a file and run it type './scanner < {file}'
+where {file} is the file you are trying to read.
 
+to test a file without invoking type './scanner {file}'
 
+to test one word and run it type './scanner {word}'
 
+to test a string type './scanner {string of words}'
 
 ==========================================================
 			Github
@@ -17,10 +23,14 @@ All logs can be found at https://github.com/ch3rc/P1
 ==========================================================
 			Issues
 ==========================================================
+I was having issues with the last character of strings
+for single words and strings you have to type ' ' after
+it so that the program recognizes a space.
 
+in files i just create a new line after the last word/
+character to fix this issue.
 
-
-
-
-
+the next project i will have this fixed but i am already
+late turning this in so i ran out of time to figure it
+out
 ==========================================================

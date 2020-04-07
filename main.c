@@ -6,13 +6,25 @@
 //File:		main.c
 //===============================================================
 
+#include "filter.h"
+#include "table.h"
 
-int main(int argc, char *argv)
+FILE *file;
+
+int main(int argc, char *argv[])
 {
+	FILE *fp;
+	//check files
+	file = checkFile(argc, argv);
 
-	//pass arguments to filter
-	//filter will call scanner
-	//filter(argc, argv);
+	if(file == NULL)
+	{
+		perror("ERROR: file: main\n");
+		exit(1);
+	}
 	
+	/*once file has been checked send to driver*/
+	driveScanner();	
+
 	return 0;
 }	
