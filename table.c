@@ -76,7 +76,6 @@ int tableLookup(enum State state, char c)
 	}
 	else if(feof(file))
 	{
-		//printf("THIS HAS MADE IT TO EOF\n");
 		current = 21;
 	}
 	else

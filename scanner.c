@@ -122,6 +122,7 @@ int getChar()
 	{	
 		return (char)c;
 		break;
+
 	}
 
 }
