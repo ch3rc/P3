@@ -26,6 +26,7 @@ const char *keywords[] = {
 	"void",
 	"declare",
 	"return",
+	"loop",
 	"in",
 	"out",
 	"program",
@@ -40,7 +41,6 @@ const char *keywords[] = {
 
 Token *fsa_driver()
 {
-	//printf("made it to the scanner\n");
 	nextChar = getChar();
 	state = START_st;
 	Token *tid = NULL;
@@ -48,6 +48,7 @@ Token *fsa_driver()
 	char str[100] = "";
 	while(state < 1000)
 	{
+
 		/*get next state from FSA TABLE*/
 		nextState = tableLookup(state, nextChar);
 		
@@ -58,7 +59,8 @@ Token *fsa_driver()
 			fclose(file);
 			exit(1);
 		}
-		else if(feof(file))
+		//else if(feof(file))
+		else if(nextState == -1)
 		{
 			/*reached end of file*/
 			tid->id = EOF_tk;
@@ -84,6 +86,8 @@ Token *fsa_driver()
 					}
 				}
 				/*if not in keyword list its an identifier*/
+				//fprintf(stderr, "ID nextState = %d, state = %d\n", nextState, state);
+				ungetc(nextChar, file);
 				tid->id = ID_tk;
 				strcpy(tid->string, str);
 				tid->line = lineCount;
@@ -94,12 +98,22 @@ Token *fsa_driver()
 			{
 				/*if greater than 1001 its a special character, 1001 is a digit*/
 				if(nextState > 1001)
+				{	
+					//fprintf(stderr, "OP nextState = %d, state = %d\n", nextState, state);
+					ungetc(nextChar, file);
 					tid->id = OP_tk;
+					strcpy(tid->string, str);
+					tid->line = lineCount;
+					return tid;
+				}
 				else
+				{
+					ungetc(nextChar, file);
 					tid->id = NUM_tk;
-				strcpy(tid->string, str);
-				tid->line = lineCount;
-				return tid;
+					strcpy(tid->string, str);
+					tid->line = lineCount;
+					return tid;
+				}
 			}
 		}
 		else
@@ -118,20 +132,25 @@ Token *fsa_driver()
 int getChar()
 {
 	int c;
-	while((c = fgetc(file)) != EOF)
-	{	
-		return (char)c;
-		break;
-
-	}
-
+	c = fgetc(file);
+	//fprintf(stderr, "nextChar = %c\n", (char)c);
+	return (char)c;
 }
 
 /*filter out comments and count new lines*/
 void filter()
 {
 	int truth;
-	
+
+	if(nextChar == '\n')
+	{	
+		while(nextChar == '\n')
+		{
+			lineCount++;
+			nextChar = getChar();
+		}
+	}
+			
 	if(nextChar == '#')
 		truth = 1;
 
@@ -141,13 +160,10 @@ void filter()
 		
 		do
 		{
+			if(nextChar == '\n')
+				lineCount++;
 
 			nextChar = getChar();
-
-			if(nextChar == '\n')
-			{
-				lineCount++;
-			}
 
 			if(nextChar < 0)
 			{
@@ -165,9 +181,12 @@ void filter()
 /*build token string*/
 void append(char *s, char c)
 {
-	int leng = strlen(s);
-	s[leng] = c;
-	s[leng + 1] = '\0';
+	if(c != ' ' && c != '\n')
+	{	
+		int leng = strlen(s);
+		s[leng] = c;
+		s[leng + 1] = '\0';
+	}
 }
 
 /*naive error check for now until further instruction on how language works*/

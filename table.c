@@ -49,8 +49,8 @@ int tableLookup(enum State state, char c)
 	
 	if(c == '\n')
 	{
-		lineCount++;
-		return 0;
+		current = 0;
+		//lineCount++;
 	}
 	else if(c == ' ' || c == '\t')
 	{
@@ -63,7 +63,6 @@ int tableLookup(enum State state, char c)
 
 	else if(isdigit(c) != 0)
 	{
-		//printf("IS THIS GETTING IN HERE?????\n");
 		current = 2;
 	}
 	else if(ispunct(c) != 0)
@@ -83,7 +82,7 @@ int tableLookup(enum State state, char c)
 		current = 22;
 	}
 	
-	//printf("c = %c, state = %d, current = %d\n", c, state, current);
+	//printf("c = %c, state = %d, current = %d, value = %d\n", c, state, current, fsa_table[state][current]);
 	return fsa_table[state][current];
 }
 

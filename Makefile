@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -I. -g -Wall
-TARGET = scanner
-OBJS = main.o scanner.o functions.o fileCheck.o table.o testScanner.o
+TARGET = parser
+OBJS = main.o scanner.o functions.o fileCheck.o table.o testScanner.o parser.o parseTree.o
 .SUFFIXES: .c .o
 
 $(TARGET) : $(OBJS)
