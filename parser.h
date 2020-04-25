@@ -14,24 +14,24 @@
 #include <unistd.h>
 #include "table.h"
 
-void parser();
-void block();
-void vars();
-void expr();
-void N();
-void A();
-void M();
-void R();
-void stats();
-void mStat();
-void stat();
-void in();
-void out();
-void iffy();
-void loop();
-void assign();
-void label();
-void Goto();
-void RO();
+struct Node *parser();
+struct Node *block();
+struct Node *vars();
+struct Node *expr();
+struct Node *N();
+struct Node *A();
+struct Node *M();
+struct Node *R();
+struct Node *stats();
+struct Node *mStat();
+struct Node *stat();
+struct Node *in();
+struct Node *out();
+struct Node *iffy();
+struct Node *loop();
+struct Node *assign();
+struct Node *label();
+struct Node *Goto();
+struct Node *RO();
 
 #endif

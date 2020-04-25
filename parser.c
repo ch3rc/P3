@@ -7,18 +7,25 @@
 //============================================================
 
 #include "parser.h"
+#include "node.h"
 
 Token *tk = NULL;
 
-void parser()
+struct Node *parser()
 {
 	tk = fsa_driver();
-	printf("<Program>\n");
-	vars();
-	block();
+	struct Node *programProd = newNode("<program>");
+
+	struct Node *varsProd = vars();
+	getNode(programProd, varsProd);
+
+	struct Node *blockProd = block();
+	getNode(programProd, blockProd);
+	
+	return programProd;
 	if(tk->id == EOF_tk)
 	{
-		return printf("Reached end of file\n");
+		return programProd;
 	}
 	else
 	{
@@ -28,565 +35,781 @@ void parser()
 	}
 }
 
-void vars()
+struct Node *vars()
 {
-	printf("<vars> ");
+	struct Node *varsProd = newNode("<vars>");
+
 	if(tk->id == KW_tk && strcmp(tk->string, "declare") == 0)
 	{
-		printf("%s ", tk->string);
+		struct Node *declareNode = newNode(tk->string);
+		getNode(varsProd, declareNode);
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
-			printf("%s ", tk->string);
+			struct Node *idNode = newNode(tk->string);
+			getNode(varsProd, idNode);
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ":=") == 0)
 			{
-				printf("%s ", tk->string);
+				struct Node *opNode = newNode(tk->string);
+				getNode(varsProd, opNode);
 				tk = fsa_driver();
 				if(tk->id == NUM_tk)
 				{
-					printf("%s ", tk->string);
+					struct Node *numNode = newNode(tk->string);
+					getNode(varsProd, numNode);
 					tk = fsa_driver();
 					if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 					{
-						printf("%s \n", tk->string);
+						struct Node *closingNode = newNode(tk->string);
+						getNode(varsProd, closingNode);
+
 						tk = fsa_driver();
-						vars();
-						return;
+						struct Node *varsProd2 = vars();
+						getNode(varsProd, varsProd2);
+						//return varsProd;
 					}
-				}
-			}
-		}
-	}
-	else
-	{
-		printf("EMPTY\n");
-	}
-	return;
-}
-
-void block()
-{
-	printf("<block> ");
-	if(tk->id == OP_tk && strcmp(tk->string, "{") == 0)
-	{
-		printf("%s\n", tk->string);
-		tk = fsa_driver();
-		vars();
-		stats();
-		if(tk->id == OP_tk && strcmp(tk->string, "}") == 0)
-		{
-			printf("<block> %s\n", tk->string);
-			tk = fsa_driver();
-			return;
-		}
-	}
-}
-
-void expr()
-{
-	printf("<expr>\n");
-	if(tk->id == OP_tk || tk->id == ID_tk || tk->id == NUM_tk)
-	{
-		N();
-		if(tk->id == OP_tk && strcmp(tk->string, "-") == 0)
-		{
-			printf("%s ", tk->string);
-			tk = fsa_driver();
-			expr();
-			return;
-		}
-		else if(tk->id != OP_tk)
-		{
-			printf("THIS IS A TEST %s\n", tk->string);
-			return;
-		}
-		return;
-	}
-	else
-	{
-		printf("None of these tokens work %s\n", tk->string);
-		return;
-	}
-}
-
-void N()
-{
-
-	printf("<N>\n");
-	if(tk->id == OP_tk || tk->id == ID_tk || tk->id == NUM_tk)
-	{
-		A();
-		if(tk->id == OP_tk && strcmp(tk->string, "/") == 0)
-		{
-			printf("%s ",tk->string);
-			tk = fsa_driver();
-			N();
-			return;
-		}
-
-		else if(tk->id == OP_tk && strcmp(tk->string, "+") == 0)
-		{
-			printf("%s ", tk->string);
-			tk = fsa_driver();
-			N();
-			return;
-		}
-		return;
-	}
-	else
-	{
-		printf("None of the tokens worked %s\n", tk->string);
-		return;
-	}
-}
-
-void A()
-{
-	printf("<A>\n");
-	if(tk->id == OP_tk || tk->id == ID_tk || tk->id == NUM_tk)
-	{
-		M();
-		if(tk->id == OP_tk && strcmp(tk->string, "+") == 0)
-		{
-			printf("%s ", tk->string);
-			tk = fsa_driver();
-			A();
-			return;
-		}
-		return;
-	}
-	else
-	{
-		printf("Not in the tokens %s\n", tk->string);
-		return;
-	}
-
-}
-
-
-void M()
-{
-	printf("<M>\n");
-	if(tk->id == OP_tk && strcmp(tk->string, "*") == 0)
-	{
-		printf("%s\n", tk->string);
-		tk = fsa_driver();
-		M();
-		return;
-	}
-	
-	if(tk->id == OP_tk && strcmp(tk->string, "(") == 0 || tk->id == ID_tk || tk->id == NUM_tk)
-	{
-		R();
-		return;
-	}
-	else
-	{
-		printf("All dems tokens was wrong %s\n", tk->string);
-		return;
-	}
-	return;
-}
-
-
-void R()
-{
-	printf("<R> ");
-	if(tk->id == OP_tk && strcmp(tk->string, "(") == 0)
-	{
-		printf("%s ", tk->string);
-		tk = fsa_driver();
-		expr();
-		if(tk->id == OP_tk && strcmp(tk->string, ")") == 0)
-		{
-			printf("%s\n",tk->string);
-			tk = fsa_driver();
-			return;
-		}
-		else
-		{
-			printf("OP token not closing parentheses %s\n", tk->string);
-			return;
-		}
-	}
-
-	if(tk->id == ID_tk)
-	{
-		printf("%s\n", tk->string);
-		tk = fsa_driver();
-		return;
-	}
-
-	if(tk->id == NUM_tk)
-	{
-		printf("%s\n", tk->string);
-		tk = fsa_driver();
-		return;
-	}
-}
-
-void stats()
-{
-	printf("<stats>\n");
-	stat();
-	mStat();
-	return;
-}
-
-void mStat()
-{
-	printf("<mStat>\n");
-	if(tk->id == KW_tk)
-	{
-		stat();
-		mStat();
-		return;
-	}
-	else
-	{
-		printf("EMPTY\n");
-		return;
-	}
-}
-
-void stat()
-{
-	printf("<stat>\n");
-	if(tk->id == KW_tk && strcmp(tk->string, "in") == 0)
-	{	
-		in();
-		return;
-	}
-	else if(tk->id == KW_tk && strcmp(tk->string, "out") == 0)
-	{
-		out();
-		return;
-	}
-	else if(tk->id == OP_tk && strcmp(tk->string, "}") == 0 || tk->id == OP_tk && strcmp(tk->string, "{") == 0)
-	{
-		block();
-		return;
-	}
-	else if(tk->id == KW_tk && strcmp(tk->string, "iffy") == 0)
-	{
-		iffy();
-		return;
-	}
-	else if(tk->id == KW_tk && strcmp(tk->string, "loop") == 0)
-	{
-		loop();
-		return;
-	}
-	else if(tk->id == ID_tk)
-	{
-		assign();
-		return;
-	}
-	else if(tk->id == KW_tk && strcmp(tk->string, "goto") == 0)
-	{
-		Goto();
-		return;
-	}
-	else if(tk->id == KW_tk && strcmp(tk->string, "label") == 0)
-	{
-		label();
-		return;
-	}
-	else
-	{
-		return printf("Error: no match %s\n", tk->string);
-	}
-}
-
-void in()
-{
-
-	printf("<in> ");
-	if(tk->id == KW_tk && strcmp(tk->string, "in") == 0)
-	{
-		printf("in ");
-		tk = fsa_driver();
-		if(tk->id == ID_tk)
-		{
-			printf("%s\n", tk->string);
-			tk = fsa_driver();
-			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
-			{
-				printf("%s\n", tk->string);
-				tk = fsa_driver();
-				return;
-			}
-		}
-		else
-		{
-			printf("Not an identifier %s\n", tk->string);
-			return;
-		}
-	}
-	else
-	{
-		printf("Incorrect keyword not IN %s\n", tk->string);
-		return;
-	}
-
-}
-
-void out()
-{	
-	printf("<out> ");
-	if(tk->id == KW_tk && strcmp(tk->string, "out") == 0)
-	{
-		printf("out ");
-		tk = fsa_driver();
-		expr();
-		if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
-		{
-			printf("%s\n", tk->string);
-			tk = fsa_driver();
-			return;
-		}
-	}
-	else
-	{
-		printf("Keyword token not OUT %s\n", tk->string);
-		return;
-	}
-}
-
-void iffy()
-{
-	printf("<if> ");
-	if(tk->id == KW_tk && strcmp(tk->string, "iffy") == 0)
-	{
-		printf("iffy ");
-		tk = fsa_driver();
-		if(tk->id == OP_tk && strcmp(tk->string, "[") == 0)
-		{ 
-			printf("%s ", tk->string);
-			tk = fsa_driver();
-			expr();
-			RO();
-			expr();
-			if(tk->id == OP_tk && strcmp(tk->string, "]") == 0)
-			{
-				printf("%s ", tk->string);
-				tk = fsa_driver();
-				if(tk->id == KW_tk && strcmp(tk->string, "then") == 0)
-				{
-					printf("%s\n", tk->string);
-					tk = fsa_driver();
-					stat();
-					if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
+					else
 					{
-						printf("%s\n", tk->string);
-						tk = fsa_driver();
-						return;
+						printf("Expected ; but got %s : %d\n", tk->string, tk->line);
+						exit(1);
 					}
 				}
 				else
 				{
-					printf("Keyword not THEN %s\n", tk->string);
-					return;
+					printf("Expect Number but got %s : %d\n", tk->string, tk->line);
+					exit(1);
 				}
 			}
 			else
 			{
-				printf("OP token not closing brace %s\n", tk->string);
-				return;
+				printf("Expected := but got %s : %d\n",tk->string, tk->line);
+				exit(1);
 			}
 		}
 		else
 		{
-			printf("OP tken not opening brace %s\n", tk->string);
-			return;
+			printf("Exepected identifier but got %s : %d\n", tk->string, tk->line);
+			exit(1);
 		}
 	}
 	else
 	{
-		printf("Keyword token not IFFY %s\n", tk->string);
-		return;
+		return varsProd;
+	}
+	return varsProd;
+}
+
+struct Node *block()
+{
+	struct Node *blockProd = newNode("<block>");
+
+	if(tk->id == OP_tk && strcmp(tk->string, "{") == 0)
+	{
+		struct Node *lParNode = newNode(tk->string);
+		getNode(blockProd, lParNode);
+
+		tk = fsa_driver();
+		struct Node *varsProd = vars();
+		getNode(blockProd, varsProd);
+
+		struct Node *statsProd = stats();
+		getNode(blockProd, statsProd);
+
+		if(tk->id == OP_tk && strcmp(tk->string, "}") == 0)
+		{
+			struct Node *closeParNode = newNode(tk->string);
+			getNode(blockProd, closeParNode);
+			tk = fsa_driver();
+			return blockProd;
+		}
+		else
+		{
+			printf("Expected '}' but got %s : %d\n", tk->string, tk->line);
+			exit(1);
+		}
 	}
 }
 
-void loop()
+struct Node *expr()
 {
-	printf("<loop> ");
+	struct Node *exprN = newNode("<expr>");
+
+	if(tk->id == OP_tk || tk->id == ID_tk || tk->id == NUM_tk)
+	{
+		struct Node *nNode = N();
+		getNode(exprN, nNode);
+		if(tk->id == OP_tk && strcmp(tk->string, "-") == 0)
+		{
+			struct Node *minusNode = newNode(tk->string);
+			getNode(exprN, minusNode);
+
+			tk = fsa_driver();
+			struct Node *exprNode2 = expr();
+			getNode(exprN, exprNode2);
+			return exprN;
+		}
+		
+		return exprN;
+	}
+	else
+	{
+		printf("None of these tokens work %s\n", tk->string);
+		exit(1);
+	}
+}
+
+struct Node *N()
+{
+	struct Node *nProd = newNode("<N>");
+
+	if(tk->id == OP_tk || tk->id == ID_tk || tk->id == NUM_tk)
+	{
+		struct Node *aNode = A();
+		getNode(nProd, aNode);
+		if(tk->id == OP_tk && strcmp(tk->string, "/") == 0)
+		{
+			struct Node *divNode = newNode(tk->string);
+			getNode(nProd, divNode);
+
+			tk = fsa_driver();
+			struct Node *nNode = N();
+			getNode(nProd, nNode);
+			return nProd;
+		}
+
+		else if(tk->id == OP_tk && strcmp(tk->string, "+") == 0)
+		{
+			struct Node *plusNode = newNode(tk->string);
+			getNode(nProd, plusNode);
+
+			tk = fsa_driver();
+			struct Node *nNode2 = N();
+			getNode(nProd, nNode2);
+			return nProd;
+		}
+		return nProd;
+	}
+	else
+	{
+		printf("None of the tokens worked %s\n", tk->string);
+		exit(1);
+	}
+}
+
+struct Node *A()
+{
+	struct Node *aProd = newNode("<A>");
+
+	if(tk->id == OP_tk || tk->id == ID_tk || tk->id == NUM_tk)
+	{
+		struct Node *mNode = M();
+		getNode(aProd, mNode);
+		if(tk->id == OP_tk && strcmp(tk->string, "+") == 0)
+		{
+			struct Node *plusNode = newNode(tk->string);
+			getNode(aProd, plusNode);
+
+			tk = fsa_driver();
+			struct Node *aNode = A();
+			getNode(aProd, aNode);
+			return aProd;
+		}
+		return aProd;
+	}
+	else
+	{
+		printf("Not in the tokens %s\n", tk->string);
+		exit(1);
+	}
+
+}
+
+
+struct Node *M()
+{
+	struct Node *mProd = newNode("<M>");
+	
+	if(tk->id == OP_tk && strcmp(tk->string, "*") == 0)
+	{
+		struct Node *multNode = newNode(tk->string);
+		getNode(mProd, multNode);
+		
+		tk = fsa_driver();
+
+		struct Node *mNode = M();
+		getNode(mProd, mNode);
+		return mProd;
+	}
+	
+	if(tk->id == OP_tk && strcmp(tk->string, "(") == 0 || tk->id == ID_tk || tk->id == NUM_tk)
+	{
+		struct Node *rNode = R();
+		getNode(mProd, rNode);
+		return mProd;
+	}
+	else
+	{
+		printf("All dems tokens was wrong %s\n", tk->string);
+		exit(1);
+	}
+
+}
+
+
+struct Node *R()
+{
+	struct Node *rProd = newNode("<R>");
+	
+	if(tk->id == OP_tk && strcmp(tk->string, "(") == 0)
+	{
+		struct Node *openNode = newNode(tk->string);
+		getNode(rProd, openNode);
+		
+
+		tk = fsa_driver();
+		struct Node *eNode = expr();
+		getNode(rProd, eNode);
+		if(tk->id == OP_tk && strcmp(tk->string, ")") == 0)
+		{
+			struct Node *closeNode = newNode(tk->string);
+			getNode(rProd, closeNode);
+			
+			tk = fsa_driver();
+			return rProd;
+		}
+		else
+		{
+			printf("OP token not closing parentheses %s\n", tk->string);
+			exit(1);
+		}
+	}
+
+	if(tk->id == ID_tk)
+	{
+		struct Node *idNode = newNode(tk->string);
+		getNode(rProd, idNode); 
+		
+		tk = fsa_driver();
+		return rProd;
+	}
+
+	if(tk->id == NUM_tk)
+	{
+		struct Node *numNode = newNode(tk->string);
+		getNode(rProd, numNode);
+		
+		tk = fsa_driver();
+		return rProd;
+	}
+	return rProd;
+}
+
+struct Node *stats()
+{
+	struct Node *statsProd = newNode("<stats>");
+	
+	struct Node *statNode = stat();
+	getNode(statsProd, statNode);
+
+	struct Node *mStatNode = mStat();
+	getNode(statsProd, mStatNode);
+	return statsProd;
+}
+
+struct Node *mStat()
+{
+	struct Node *mStatProd = newNode("<mStat>");
+	
+	if(tk->id == KW_tk)
+	{
+		struct Node *statNode = stat();
+		getNode(mStatProd, statNode);
+
+		struct Node *mStatNode = mStat();
+		getNode(mStatProd, mStatNode);
+		return mStatProd;
+	}
+	else
+	{
+		return mStatProd;
+	}
+}
+
+struct Node *stat()
+{
+	struct Node *statProd = newNode("<stat>");
+	
+	if(tk->id == KW_tk && strcmp(tk->string, "in") == 0)
+	{	
+		struct Node *inNode = in();
+		getNode(statProd, inNode);
+		return statProd;
+	}
+	else if(tk->id == KW_tk && strcmp(tk->string, "out") == 0)
+	{
+		struct Node *outNode = out();
+		getNode(statProd, outNode);
+		return statProd;
+	}
+	else if(tk->id == OP_tk && strcmp(tk->string, "}") == 0 || tk->id == OP_tk && strcmp(tk->string, "{") == 0)
+	{
+		struct Node *blockNode = block();
+		getNode(statProd, blockNode);
+		return statProd;
+	}
+	else if(tk->id == KW_tk && strcmp(tk->string, "iffy") == 0)
+	{
+		struct Node *ifNode = iffy();
+		getNode(statProd, ifNode);
+		return statProd;
+	}
+	else if(tk->id == KW_tk && strcmp(tk->string, "loop") == 0)
+	{
+		struct Node *loopNode = loop();
+		getNode(statProd, loopNode);
+		return statProd;
+	}
+	else if(tk->id == ID_tk)
+	{
+		struct Node *assNode = assign();
+		getNode(statProd, assNode);
+		return statProd;
+	}
+	else if(tk->id == KW_tk && strcmp(tk->string, "goto") == 0)
+	{
+		struct Node *gotoNode = Goto();
+		getNode(statProd, gotoNode);
+		return statProd;
+	}
+	else if(tk->id == KW_tk && strcmp(tk->string, "label") == 0)
+	{
+		struct Node *labelNode = label();
+		getNode(statProd, labelNode);
+		return statProd;
+	}
+	else
+	{
+		printf("Error: no match %s\n", tk->string);
+		exit(1);
+	}
+}
+
+struct Node *in()
+{
+	struct Node *inProd = newNode("<in>");
+
+	if(tk->id == KW_tk && strcmp(tk->string, "in") == 0)
+	{
+		struct Node *inNode = newNode(tk->string);
+		getNode(inProd, inNode);
+		
+		tk = fsa_driver();
+		if(tk->id == ID_tk)
+		{
+			struct Node *idNode = newNode(tk->string);
+			getNode(inProd, idNode);
+			
+			tk = fsa_driver();
+			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
+			{
+				struct Node *parNode = newNode(tk->string);
+				getNode(inProd, parNode);
+				
+				tk = fsa_driver();
+				return inProd;
+			}
+			else
+			{
+				printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+				exit(1);
+			}
+		}
+		else
+		{
+			printf("Expected identifier but got %s : %d\n", tk->string, tk->line);
+			exit(1);
+		}
+	}
+	else
+	{
+		printf("Expected keyword 'in' but got %s : %d\n", tk->string, tk->line);
+		exit(1);
+	}
+}
+
+struct Node *out()
+{	
+	struct Node *outProd = newNode("<out>");
+	
+	if(tk->id == KW_tk && strcmp(tk->string, "out") == 0)
+	{
+		struct Node *outNode = newNode(tk->string);
+		getNode(outProd, outNode);
+		
+
+		tk = fsa_driver();
+		struct Node *exprNode = expr();
+		getNode(outProd, exprNode);
+
+		if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
+		{
+			struct Node *semiNode = newNode(tk->string);
+			getNode(outProd, semiNode);
+			
+			tk = fsa_driver();
+			return outProd;
+		}
+		else
+		{
+			printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+			exit(1);
+		}
+	}
+	else
+	{
+		printf("Expected keyword 'out' but got %s : %d\n", tk->string, tk->line);
+		exit(1);
+	}
+}
+
+struct Node *iffy()
+{
+	struct Node *ifProd = newNode("<if>");
+	
+	if(tk->id == KW_tk && strcmp(tk->string, "iffy") == 0)
+	{
+		struct Node *ifNode = newNode(tk->string);
+		getNode(ifProd, ifNode);
+	
+		tk = fsa_driver();
+		if(tk->id == OP_tk && strcmp(tk->string, "[") == 0)
+		{ 
+			struct Node *oBrackNode = newNode(tk->string);
+			getNode(ifProd, oBrackNode);
+			
+			tk = fsa_driver();
+			struct Node *expr1Node = expr();
+			getNode(ifProd, expr1Node);
+
+			struct Node *roNode = RO();
+			getNode(ifProd, roNode);
+
+			struct Node *expr2Node = expr();
+			getNode(ifProd, expr2Node);
+			if(tk->id == OP_tk && strcmp(tk->string, "]") == 0)
+			{
+				struct Node *cBrackNode = newNode(tk->string);
+				getNode(ifProd, cBrackNode);
+				
+				tk = fsa_driver();
+				if(tk->id == KW_tk && strcmp(tk->string, "then") == 0)
+				{
+					struct Node *keyNode = newNode(tk->string);
+					getNode(ifProd, keyNode);
+					
+					tk = fsa_driver();
+					struct Node *statNode = stat();
+					getNode(ifProd, statNode);
+					if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
+					{
+						struct Node *semiNode = newNode(tk->string);
+						getNode(ifProd, semiNode);
+					
+						tk = fsa_driver();
+						return ifProd;
+					}
+					else
+					{
+						printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+						exit(1);
+					}
+				}
+				else
+				{
+					printf("Expected Keyword 'then' but got %s : %d\n", tk->string, tk->line);
+					exit(1);
+				}
+			}
+			else
+			{
+				printf("Expected ']' but got %s : %d\n", tk->string, tk->line);
+				exit(1);
+			}
+		}
+		else
+		{
+			printf("Expected '[' but got %s : %d\n", tk->string, tk->line);
+			exit(1);
+		}
+	}
+	else
+	{
+		printf("Expected keyword 'iffy' but got %s : %d\n", tk->string, tk->line);
+		exit(1);
+	}
+}
+
+struct Node *loop()
+{
+	struct Node *loopProd = newNode("<loop>");
+
 	if(tk->id == KW_tk && strcmp(tk->string, "loop") == 0)
 	{
-		printf("loop ");
+		struct Node *loopNode = newNode(tk->string);
+		getNode(loopProd, loopNode);
+
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, "[") == 0)
 		{
-			printf("%s ", tk->string);
+			struct Node *oBrackNode = newNode(tk->string);
+			getNode(loopProd, oBrackNode);
+			
 			tk = fsa_driver();
-			expr();
-			RO();
-			expr();
+			struct Node *eNode1 = expr();
+			getNode(loopProd, eNode1);
+
+			struct Node *roNode = RO();
+			getNode(loopProd, roNode);
+
+			struct Node *eNode2 = expr();
+			getNode(loopProd, eNode2);
 			if(tk->id == OP_tk && strcmp(tk->string, "]") == 0)
 			{
-				printf("%s ", tk->string);
+				struct Node *cBrackNode = newNode(tk->string);
+				getNode(loopProd, cBrackNode);
+				
 				tk = fsa_driver();
-				stat();
+				struct Node *statNode = stat();
+				getNode(loopProd, statNode);
 				if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 				{
-					printf("%s\n", tk->string);
+					struct Node *semiNode = newNode(tk->string);
+					getNode(loopProd, semiNode);
+					
 					tk = fsa_driver();
-					return;
+					return loopProd;
+				}
+				else
+				{
+					printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+					exit(1);
 				}
 			}
 			else
 			{
-				printf("Incorrect closing brace %s\n", tk->string);
-				return;
+				printf("Expected ']' but got %s : %d\n", tk->string, tk->line);
+				exit(1);
 			}
 		}
 		else
 		{
-			printf("incorrect opening bracket %s\n", tk->string);
-			return;
+			printf("Expected '[' but got %s : %d\n", tk->string, tk->line);
+			exit(1);
 		}
 	}
 	else
 	{
-		printf("Incorrect keyword for loop %s\n", tk->string);
-		return;
+		printf("Expected keyword 'loop' but got %s : %d\n", tk->string, tk->line);
+		exit(1);
 	}
 }
 
-void assign()
+struct Node *assign()
 {
-	printf("<assign> ");
+	struct Node *assProd = newNode("<assign>");
+	
 	if(tk->id == ID_tk)
 	{
-		printf("%s ", tk->string);
+		struct Node *idNode = newNode(tk->string);
+		getNode(assProd, idNode);
+		
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, ":=") == 0)
 		{
-			printf("%s ", tk->string);
+			struct Node *assNode = newNode(tk->string);
+			getNode(assProd, assNode);
+			
 			tk = fsa_driver();
-			expr();
+			struct Node *exprNode = expr();
+			getNode(idNode, exprNode);
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
-				printf("%s\n", tk->string);
+				struct Node *semiNode = newNode(tk->string);
+				getNode(assProd, semiNode);
+				
 				tk = fsa_driver();
-				return;
+				return assProd;
+			}
+			else
+			{
+				printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+				exit(1);
 			}
 		}
 		else
 		{
-			printf("incorrect token arrangement %s\n", tk->string);
-			return;
+			printf("Expected ':=' but got %s : %d\n", tk->string, tk->line);
+			exit(1);
 		}
 	}
 	else
 	{
-		printf("Not an ID token %s\n", tk->string);
-		return;
+		printf("Expected ID token bt got %s : %d\n", tk->string, tk->line);
+		exit(1);
 	}
 }
 
-void label()
+struct Node *label()
 {
-	printf("<label> ");
+	struct Node *labelProd = newNode("<label>");
+
 	if(tk->id == KW_tk && strcmp(tk->string, "label") == 0)
 	{
-		printf("label ");
+		struct Node *labNode = newNode(tk->string);
+		getNode(labelProd, labNode);
+		
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
-			printf("%s\n", tk->string);
+			struct Node *idNode = newNode(tk->string);
+			getNode(labelProd, idNode);
+			
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
-				printf("%s\n", tk->string);
+				struct Node *parNode = newNode(tk->string);
+				getNode(labelProd, parNode);
+			
 				tk = fsa_driver();
-				return;
+				return labelProd;
 			}
+			else
+			{
+				printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+				exit(1);
+			}
+		}
+		else
+		{
+			printf("Expexted identifier but got %s : %d\n", tk->string, tk->line);
+			exit(1);
 		}
 	}
 	else
 	{
-		printf("Error: incorrect keyword %s\n", tk->string);
-		return;
+		printf("Expected keyword 'label' but got %s : %d\n", tk->string, tk->line);
+		exit(1);
 	}
 }
 
-void Goto()
+//goto statements
+struct Node *Goto()
 {
-	printf("<goto> ");
+	struct Node *gotoProd = newNode("<goto>");
+	
 	if(tk->id == KW_tk && strcmp(tk->string, "goto") == 0)
 	{
-		printf("in ");
+		struct Node *goNode = newNode(tk->string);
+		getNode(gotoProd, goNode);
+		
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
-			printf("%s\n", tk->string);
+			struct Node *idNode = newNode(tk->string);
+			getNode(gotoProd, idNode);
+			
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
-				printf("%s\n", tk->string);
+				struct Node *semiNode = newNode(tk->string);
+				getNode(gotoProd, semiNode);
+				
 				tk = fsa_driver();
-				return;
+				return gotoProd;
 			}
+			else
+			{
+				printf("Expected ';' but got %s : %d\n", tk->string, tk->line);
+				exit(1);
+			}
+		}
+		else
+		{
+			printf("Expected identifier but got %s : %d\n", tk->string, tk->line);
+			exit(1);
 		}
 	}
 	else
 	{
-		printf("incorrect keyword %s\n", tk->string);
-		return;
+		printf("Expected keyword goto %s : %d\n", tk->string, tk->line);
+		exit(1);
 	}
 }
 
-void RO()
+//relational operators
+struct Node *RO()
 {
-	printf("<RO> ");
+	struct Node *roProd = newNode("<RO>");
+	
 	if(tk->id == OP_tk && strcmp(tk->string, "<") == 0)
 	{
-		printf("%s",tk->string);
+		struct Node *opNode = newNode(tk->string);
+		getNode(roProd, opNode);
+		
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, "<") == 0 || tk->id == OP_tk && strcmp(tk->string, ">") == 0)
 		{
+			struct Node *nextNode = newNode(tk->string);
+			getNode(roProd, nextNode);
 			//double <<
-			printf("%s\n", tk->string);
+			
 			tk = fsa_driver();
-			return;
+			return roProd;
 		}
 		else
 		{
 			//single <
-			return;
+			return roProd;
 		}
 	}
 	else if(tk->id == OP_tk && strcmp(tk->string, ">") == 0)
 	{
-		printf("%s", tk->string);
+		struct Node *nextNode2 = newNode(tk->string);
+		getNode(roProd, nextNode2);
+		
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, ">") == 0)
 		{
+			struct Node *nextNode3 = newNode(tk->string);
+			getNode(roProd, nextNode3);
 			//double >>
-			printf("%s\n", tk->string);
+		
 			tk = fsa_driver();
-			return;
+			return roProd;
 		}
 		else
 		{
 			//single >
-			return; 
+			return roProd; 
 		}
 	}
 	else if(tk->id == OP_tk && strcmp(tk->string, "==") == 0)
 	{
+		struct Node *equalNode = newNode(tk->string);
+		getNode(roProd, equalNode);
 		//double == 
-		printf("%s\n", tk->string);
+	
 		tk = fsa_driver();
-		return;
+		return roProd;
 	}
 	else 
 	{
+		struct Node *assNode = newNode(tk->string);
+		getNode(roProd, assNode);
 		//single =
-		printf("%s\n", tk->string);
+		
 		tk = fsa_driver();
-		return;
+		return roProd;
 	}
 }

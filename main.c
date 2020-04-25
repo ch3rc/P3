@@ -8,12 +8,13 @@
 
 #include "filter.h"
 #include "table.h"
+#include "node.h"
+#include "parser.h"
 
 FILE *file;
 
 int main(int argc, char *argv[])
 {
-	FILE *fp;
 	//check files
 	file = checkFile(argc, argv);
 
@@ -24,7 +25,8 @@ int main(int argc, char *argv[])
 	}
 	
 	/*once file has been checked send to driver*/
-	driveScanner();	
-
+	//driveScanner();	
+	struct Node *root = parser();
+	preOrder(root, 0);
 	return 0;
 }	
