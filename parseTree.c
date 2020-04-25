@@ -33,7 +33,7 @@ void getNode(struct Node* parent, struct Node* child)
 	int i;
 	for(i = 0; i < parent->size; i++)
 	{
-		*(temp->child + i) = *(parent->child + i);
+		temp->child[i] = parent->child[i];
 	}
 
 	temp->child[parent->size] = *child;
