@@ -41,7 +41,7 @@ void getNode(struct Node* parent, struct Node* child)
 {
 	struct Node *temp = newNode("");
 
-	temp->child = (struct Node*)malloc(sizeof(struct Node) * (parent->size + 1));
+	temp->child = malloc(sizeof(struct Node) * (parent->size + sizeof(child)));
 	int i;
 	for(i = 0; i < parent->size; i++)
 	{
