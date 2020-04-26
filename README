@@ -2,9 +2,9 @@
 		    Compile and Run
 ==========================================================
 to compile type 'make'
-to run type './parser' {file}
-or './parser' > {file}
-or './parser' {typed word/words}
+to run type './statSem' {file}
+or './statSem' > {file}
+or './statSem' {typed word/words}
 ==========================================================
 			Github
 ==========================================================
@@ -14,7 +14,7 @@ All logs can be found at https://github.com/ch3rc/P3
 ==========================================================
 			Issues
 ==========================================================
-
+No Issues this round
 
 
 ==========================================================

@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -I. -g -Wall
-TARGET = parser
+TARGET = statSem
 OBJS = main.o scanner.o functions.o fileCheck.o table.o testScanner.o parser.o parseTree.o
 .SUFFIXES: .c .o
 

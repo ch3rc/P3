@@ -42,32 +42,37 @@ struct Node *vars()
 	if(tk->id == KW_tk && strcmp(tk->string, "declare") == 0)
 	{
 		struct Node *declareNode = newNode(tk->string);
+		declareNode->id = tk->id;
 		getNode(varsProd, declareNode);
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
 			struct Node *idNode = newNode(tk->string);
+			idNode->id = tk->id;
 			getNode(varsProd, idNode);
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ":=") == 0)
 			{
 				struct Node *opNode = newNode(tk->string);
+				opNode->id = tk->id;
 				getNode(varsProd, opNode);
 				tk = fsa_driver();
 				if(tk->id == NUM_tk)
 				{
 					struct Node *numNode = newNode(tk->string);
+					numNode->id = tk->id;
 					getNode(varsProd, numNode);
 					tk = fsa_driver();
 					if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 					{
 						struct Node *closingNode = newNode(tk->string);
+						closingNode->id = tk->id;
 						getNode(varsProd, closingNode);
 
 						tk = fsa_driver();
 						struct Node *varsProd2 = vars();
 						getNode(varsProd, varsProd2);
-						//return varsProd;
+						return varsProd;
 					}
 					else
 					{
@@ -107,6 +112,7 @@ struct Node *block()
 	if(tk->id == OP_tk && strcmp(tk->string, "{") == 0)
 	{
 		struct Node *lParNode = newNode(tk->string);
+		lParNode->id = tk->id;
 		getNode(blockProd, lParNode);
 
 		tk = fsa_driver();
@@ -119,6 +125,7 @@ struct Node *block()
 		if(tk->id == OP_tk && strcmp(tk->string, "}") == 0)
 		{
 			struct Node *closeParNode = newNode(tk->string);
+			closeParNode->id = tk->id;
 			getNode(blockProd, closeParNode);
 			tk = fsa_driver();
 			return blockProd;
@@ -142,6 +149,7 @@ struct Node *expr()
 		if(tk->id == OP_tk && strcmp(tk->string, "-") == 0)
 		{
 			struct Node *minusNode = newNode(tk->string);
+			minusNode->id = tk->id;
 			getNode(exprN, minusNode);
 
 			tk = fsa_driver();
@@ -170,6 +178,7 @@ struct Node *N()
 		if(tk->id == OP_tk && strcmp(tk->string, "/") == 0)
 		{
 			struct Node *divNode = newNode(tk->string);
+			divNode->id = tk->id;
 			getNode(nProd, divNode);
 
 			tk = fsa_driver();
@@ -181,6 +190,7 @@ struct Node *N()
 		else if(tk->id == OP_tk && strcmp(tk->string, "+") == 0)
 		{
 			struct Node *plusNode = newNode(tk->string);
+			plusNode->id = tk->id;
 			getNode(nProd, plusNode);
 
 			tk = fsa_driver();
@@ -208,6 +218,7 @@ struct Node *A()
 		if(tk->id == OP_tk && strcmp(tk->string, "+") == 0)
 		{
 			struct Node *plusNode = newNode(tk->string);
+			plusNode->id = tk->id;
 			getNode(aProd, plusNode);
 
 			tk = fsa_driver();
@@ -233,6 +244,7 @@ struct Node *M()
 	if(tk->id == OP_tk && strcmp(tk->string, "*") == 0)
 	{
 		struct Node *multNode = newNode(tk->string);
+		multNode->id = tk->id;
 		getNode(mProd, multNode);
 		
 		tk = fsa_driver();
@@ -264,6 +276,7 @@ struct Node *R()
 	if(tk->id == OP_tk && strcmp(tk->string, "(") == 0)
 	{
 		struct Node *openNode = newNode(tk->string);
+		openNode->id = tk->id;
 		getNode(rProd, openNode);
 		
 
@@ -273,6 +286,7 @@ struct Node *R()
 		if(tk->id == OP_tk && strcmp(tk->string, ")") == 0)
 		{
 			struct Node *closeNode = newNode(tk->string);
+			closeNode->id = tk->id;
 			getNode(rProd, closeNode);
 			
 			tk = fsa_driver();
@@ -288,6 +302,7 @@ struct Node *R()
 	if(tk->id == ID_tk)
 	{
 		struct Node *idNode = newNode(tk->string);
+		idNode->id = tk->id;
 		getNode(rProd, idNode); 
 		
 		tk = fsa_driver();
@@ -297,6 +312,7 @@ struct Node *R()
 	if(tk->id == NUM_tk)
 	{
 		struct Node *numNode = newNode(tk->string);
+		numNode->id = tk->id;
 		getNode(rProd, numNode);
 		
 		tk = fsa_driver();
@@ -402,18 +418,21 @@ struct Node *in()
 	if(tk->id == KW_tk && strcmp(tk->string, "in") == 0)
 	{
 		struct Node *inNode = newNode(tk->string);
+		inNode->id = tk->id;
 		getNode(inProd, inNode);
 		
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
 			struct Node *idNode = newNode(tk->string);
+			idNode->id = tk->id;
 			getNode(inProd, idNode);
 			
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
 				struct Node *parNode = newNode(tk->string);
+				parNode->id = tk->id;
 				getNode(inProd, parNode);
 				
 				tk = fsa_driver();
@@ -445,6 +464,7 @@ struct Node *out()
 	if(tk->id == KW_tk && strcmp(tk->string, "out") == 0)
 	{
 		struct Node *outNode = newNode(tk->string);
+		outNode->id = tk->id;
 		getNode(outProd, outNode);
 		
 
@@ -455,6 +475,7 @@ struct Node *out()
 		if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 		{
 			struct Node *semiNode = newNode(tk->string);
+			semiNode->id = tk->id;
 			getNode(outProd, semiNode);
 			
 			tk = fsa_driver();
@@ -480,12 +501,14 @@ struct Node *iffy()
 	if(tk->id == KW_tk && strcmp(tk->string, "iffy") == 0)
 	{
 		struct Node *ifNode = newNode(tk->string);
+		ifNode->id = tk->id;
 		getNode(ifProd, ifNode);
 	
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, "[") == 0)
 		{ 
 			struct Node *oBrackNode = newNode(tk->string);
+			oBrackNode->id = tk->id;
 			getNode(ifProd, oBrackNode);
 			
 			tk = fsa_driver();
@@ -500,12 +523,14 @@ struct Node *iffy()
 			if(tk->id == OP_tk && strcmp(tk->string, "]") == 0)
 			{
 				struct Node *cBrackNode = newNode(tk->string);
+				cBrackNode->id = tk->id;
 				getNode(ifProd, cBrackNode);
 				
 				tk = fsa_driver();
 				if(tk->id == KW_tk && strcmp(tk->string, "then") == 0)
 				{
 					struct Node *keyNode = newNode(tk->string);
+					keyNode->id = tk->id;
 					getNode(ifProd, keyNode);
 					
 					tk = fsa_driver();
@@ -514,6 +539,7 @@ struct Node *iffy()
 					if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 					{
 						struct Node *semiNode = newNode(tk->string);
+						semiNode->id = tk->id;
 						getNode(ifProd, semiNode);
 					
 						tk = fsa_driver();
@@ -557,12 +583,14 @@ struct Node *loop()
 	if(tk->id == KW_tk && strcmp(tk->string, "loop") == 0)
 	{
 		struct Node *loopNode = newNode(tk->string);
+		loopNode->id = tk->id;
 		getNode(loopProd, loopNode);
 
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, "[") == 0)
 		{
 			struct Node *oBrackNode = newNode(tk->string);
+			oBrackNode->id = tk->id;
 			getNode(loopProd, oBrackNode);
 			
 			tk = fsa_driver();
@@ -577,6 +605,7 @@ struct Node *loop()
 			if(tk->id == OP_tk && strcmp(tk->string, "]") == 0)
 			{
 				struct Node *cBrackNode = newNode(tk->string);
+				cBrackNode->id = tk->id;
 				getNode(loopProd, cBrackNode);
 				
 				tk = fsa_driver();
@@ -585,6 +614,7 @@ struct Node *loop()
 				if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 				{
 					struct Node *semiNode = newNode(tk->string);
+					semiNode->id = tk->id;
 					getNode(loopProd, semiNode);
 					
 					tk = fsa_driver();
@@ -622,20 +652,23 @@ struct Node *assign()
 	if(tk->id == ID_tk)
 	{
 		struct Node *idNode = newNode(tk->string);
+		idNode->id = tk->id;
 		getNode(assProd, idNode);
 		
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, ":=") == 0)
 		{
 			struct Node *assNode = newNode(tk->string);
+			assNode->id = tk->id;
 			getNode(assProd, assNode);
 			
 			tk = fsa_driver();
 			struct Node *exprNode = expr();
-			getNode(idNode, exprNode);
+			getNode(assProd, exprNode);
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
 				struct Node *semiNode = newNode(tk->string);
+				semiNode->id = tk->id;
 				getNode(assProd, semiNode);
 				
 				tk = fsa_driver();
@@ -667,18 +700,21 @@ struct Node *label()
 	if(tk->id == KW_tk && strcmp(tk->string, "label") == 0)
 	{
 		struct Node *labNode = newNode(tk->string);
+		labNode->id = tk->id;
 		getNode(labelProd, labNode);
 		
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
 			struct Node *idNode = newNode(tk->string);
+			idNode->id = tk->id;
 			getNode(labelProd, idNode);
 			
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
 				struct Node *parNode = newNode(tk->string);
+				parNode->id = tk->id;
 				getNode(labelProd, parNode);
 			
 				tk = fsa_driver();
@@ -711,18 +747,21 @@ struct Node *Goto()
 	if(tk->id == KW_tk && strcmp(tk->string, "goto") == 0)
 	{
 		struct Node *goNode = newNode(tk->string);
+		goNode->id = tk->id;
 		getNode(gotoProd, goNode);
 		
 		tk = fsa_driver();
 		if(tk->id == ID_tk)
 		{
 			struct Node *idNode = newNode(tk->string);
+			idNode->id = tk->id;
 			getNode(gotoProd, idNode);
 			
 			tk = fsa_driver();
 			if(tk->id == OP_tk && strcmp(tk->string, ";") == 0)
 			{
 				struct Node *semiNode = newNode(tk->string);
+				semiNode->id = tk->id;
 				getNode(gotoProd, semiNode);
 				
 				tk = fsa_driver();
@@ -755,12 +794,14 @@ struct Node *RO()
 	if(tk->id == OP_tk && strcmp(tk->string, "<") == 0)
 	{
 		struct Node *opNode = newNode(tk->string);
+		opNode->id = tk->id;
 		getNode(roProd, opNode);
 		
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, "<") == 0 || tk->id == OP_tk && strcmp(tk->string, ">") == 0)
 		{
 			struct Node *nextNode = newNode(tk->string);
+			nextNode->id = tk->id;
 			getNode(roProd, nextNode);
 			//double <<
 			
@@ -776,12 +817,14 @@ struct Node *RO()
 	else if(tk->id == OP_tk && strcmp(tk->string, ">") == 0)
 	{
 		struct Node *nextNode2 = newNode(tk->string);
+		nextNode2->id = tk->id;
 		getNode(roProd, nextNode2);
 		
 		tk = fsa_driver();
 		if(tk->id == OP_tk && strcmp(tk->string, ">") == 0)
 		{
 			struct Node *nextNode3 = newNode(tk->string);
+			nextNode3->id = tk->id;
 			getNode(roProd, nextNode3);
 			//double >>
 		
@@ -797,6 +840,7 @@ struct Node *RO()
 	else if(tk->id == OP_tk && strcmp(tk->string, "==") == 0)
 	{
 		struct Node *equalNode = newNode(tk->string);
+		equalNode->id = tk->id;
 		getNode(roProd, equalNode);
 		//double == 
 	
@@ -806,6 +850,7 @@ struct Node *RO()
 	else 
 	{
 		struct Node *assNode = newNode(tk->string);
+		assNode->id = tk->id;
 		getNode(roProd, assNode);
 		//single =
 		
