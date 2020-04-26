@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 	/*once file has been checked send to driver*/
 	//driveScanner();	
 	struct Node *root = parser();
+	SSTV(root);
 	preOrder(root, 0);
 	return 0;
 }	
