@@ -40,16 +40,10 @@ struct Node *newNode(char* token)
 void getNode(struct Node* parent, struct Node* child)
 {
 	struct Node *temp = newNode("");
-
-	temp->child = malloc(sizeof(struct Node) * (parent->size + sizeof(child)));
-	int i;
-	for(i = 0; i < parent->size; i++)
-	{
-		temp->child[i] = parent->child[i];
-	}
-
-	temp->child[parent->size] = *child;
-	parent->child = temp->child;
+	temp->child = (struct Node*)malloc(sizeof(struct Node));
+	parent->child = (struct Node*)realloc(parent->child, sizeof(struct Node) * (parent->size + 1));
+	temp->child = child;
+	parent->child[parent->size] = *(temp->child);
 	parent->size++;
 }
 
@@ -60,8 +54,8 @@ void preOrder(struct Node *root, int level)
 	{
 		printf("%*c%s\n", level * 2, ' ', root->token);
 		
-		int i;
-		for(i = 0; i < root->size; i++)
+		int i = 0;
+		while(i < root->size)
 		{
 			preOrder(&root->child[i], level + 1);
 		}
